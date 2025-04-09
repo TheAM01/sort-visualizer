@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <div class="workspace">
+
+        <div class="heading">Algorithm Visualizer</div>
+
+        <div class="bars-parent" id="bars-parent">
+
+        </div>
+
+        <div class="control-panel">
+            <div class="btn-row">
+                <div>
+                    <button class="control-buttons" onclick="shuffleBars()">Shuffle</button>
+                    <button class="control-buttons" onclick="visualBubbleSort()">Bubble Sort</button>
+                    <button class="control-buttons" onclick="visualSelectionSort()">Selection Sort</button>
+                    <button class="control-buttons" onclick="renderBars(barsSorted)">Reset</button>
+                </div>
+                <div>
+                    <input type="number" name="bars-qty" id="bars-qty" class="bars-qty" placeholder="Amount of bars">
+                    <button class="control-buttons" onclick="changeBars()">Render</button>
+                </div>
+            </div>
+            <div class="sm-headings">
+                <div class="mini-heading">Speed Multiplier</div>
+                <div id="multiplier-value">50X</div>
+            </div>
+            <input type="range" min="1" max="100" id="speed-multiplier">
+        </div>
+
+        <div class="status">
+            <div class="status-icon" id="status-icon"></div>
+            <div class="status-text" id="status-text">Ready to sort</div>
+        </div>
+
+    </div>
+    <script src="./script.js"></script>
+</body>
+</html>
