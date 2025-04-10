@@ -346,3 +346,5 @@ async function visualHeapSort(array, container) {
 
     array[0].classList.add("sorted");
 }
+
+// dsa project
