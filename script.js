@@ -292,8 +292,6 @@ function element(name, className, attributes, innerText) {
 // EXTRA
 async function visualHeapSort(array, container) {
 
-    
-
     let n = array.length;
 
     async function heapify(n, i) {
