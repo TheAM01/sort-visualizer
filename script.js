@@ -154,7 +154,7 @@ async function visualBubbleSort(array=bars, container=barsParent) {
 
     }
 
-    await sleep(5*speedMultiplier);
+    await sleep(100*speedMultiplier+1000);
     removeClass(bars, "sorted");
 
     statusText.innerText = "Bubble sorted ✅"
@@ -210,13 +210,158 @@ async function visualSelectionSort(array=bars, container=barsParent) {
         removeClass([array[i]], "selected");
         array[i].classList.add("sorted");
     }
-    await sleep(5*speedMultiplier)
+    await sleep(100*speedMultiplier+1000)
     removeClass(array, "sorted")
 
     statusText.innerText = "Selection sorted ✅"
     removeClass([statusIcon], "comparing")
 
 }
+
+async function visualHeapSort(array = bars, container = barsParent) {
+    statusText.innerText = "Heap sorting...";
+    addClass([statusIcon], "comparing");
+
+    if (await isSorted(array, true)) {
+        statusText.innerText = "Bars are already sorted";
+        removeClass([statusIcon], "comparing");
+        addClass([statusIcon], "selected");
+
+        setTimeout(() => {
+            removeClass([statusIcon], "selected");
+            statusText.innerText = "Ready to sort";
+        }, 3 * 1000);
+
+        return;
+    }
+
+    let n = array.length;
+
+    // heapify function
+    async function heapify(n, i) {
+        let largest = i;
+        let l = 2 * i + 1; // Left child
+        let r = 2 * i + 2; // Right child
+
+        // Ensure indices are within bounds before proceeding
+        if (l < n) addClass([array[l]], "comparing");
+        if (r < n) addClass([array[r]], "comparing");
+
+        await sleep(1.5*speedMultiplier);
+
+        // Compare left child
+        if (l < n && getHeight(array[l]) > getHeight(array[largest])) {
+            largest = l;
+        }
+
+        // Compare right child
+        if (r < n && getHeight(array[r]) > getHeight(array[largest])) {
+            largest = r;
+        }
+
+        // If largest is not the current node, swap them and recurse
+        if (largest !== i) {
+            addClass([array[i], array[largest]], "selected");
+            await sleep(1.5*speedMultiplier);
+            swapInDOM(array, i, largest, container);
+            await sleep(1.5*speedMultiplier);
+            removeClass([array[i], array[largest]], "selected");
+            await heapify(n, largest);
+        }
+
+        // Remove classes from children after comparison
+        if (l < n) removeClass([array[l]], "comparing");
+        if (r < n) removeClass([array[r]], "comparing");
+    }
+
+    // Build max heap
+    for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+        await heapify(n, i);
+    }
+
+    // Extract elements from heap
+    for (let i = n - 1; i > 0; i--) {
+        addClass([array[0], array[i]], "selected");
+        await sleep(1.5*speedMultiplier);
+        swapInDOM(array, 0, i, container);
+        removeClass([array[0], array[i]], "selected");
+        array[i].classList.add("sorted");
+        await heapify(i, 0);
+    }
+
+    array[0].classList.add("sorted");
+    
+    statusText.innerText = "Heap sorted ✅";
+    removeClass([statusIcon], "comparing");
+    
+    await sleep(100*speedMultiplier+1000)
+    removeClass(bars, "comparing")
+    removeClass(bars, "sorted")
+}
+
+async function visualInsertionSort(array = bars, container = barsParent) {
+    statusText.innerText = "Insertion sorting...";
+    addClass([statusIcon], "comparing");
+
+    // Step 1: Clear all color classes
+    removeClass(array, "selected");
+    removeClass(array, "comparing");
+    removeClass(array, "sorted");
+
+    if (await isSorted(array, true)) {
+        statusText.innerText = "Bars are already sorted";
+        removeClass([statusIcon], "comparing");
+        addClass([statusIcon], "selected");
+
+        setTimeout(() => {
+            removeClass([statusIcon], "selected");
+            statusText.innerText = "Ready to sort";
+        }, 3 * 1000);
+
+        return;
+    }
+
+    let n = array.length;
+
+    for (let i = 1; i < n; i++) {
+        let key = array[i];
+        let j = i - 1;
+
+        // Highlight key as red (selected)
+        addClass([key], "selected");
+
+        // Mark the left portion as yellow (comparing)
+        for (let k = 0; k < i; k++) {
+            addClass([array[k]], "comparing");
+        }
+
+        await sleep(2*speedMultiplier);
+
+        while (j >= 0 && getHeight(array[j]) > getHeight(key)) {
+            // Swap visually and in array
+            swapInDOM(array, j + 1, j, container);
+
+            await sleep(2*speedMultiplier);
+            j--;
+        }
+
+        // Remove all temp classes
+        removeClass(array, "selected");
+        removeClass(array, "comparing");
+    }
+
+    // Finally, mark all bars as sorted (green)
+    addClass(array, "sorted");
+
+    await sleep(100*speedMultiplier+1000);
+    removeClass(array, "sorted")
+
+    statusText.innerText = "Insertion sorted ✅";
+    removeClass([statusIcon], "comparing");
+}
+
+
+
 
 
 // HELPER FUNCTIONS
@@ -290,59 +435,6 @@ function element(name, className, attributes, innerText) {
 }
 
 // EXTRA
-async function visualHeapSort(array, container) {
 
-    let n = array.length;
-
-    async function heapify(n, i) {
-        let largest = i;
-        let l = 2 * i + 1;
-        let r = 2 * i + 2;
-
-        highlightBars([array[i]], "selected");
-
-        if (l < n) highlightBars([array[l]], "comparing");
-        if (r < n) highlightBars([array[r]], "comparing");
-
-        await sleep(150);
-
-        if (l < n && getHeight(array[l]) > getHeight(array[largest])) {
-            largest = l;
-        }
-
-        if (r < n && getHeight(array[r]) > getHeight(array[largest])) {
-            largest = r;
-        }
-
-        unhighlightBars([array[i], array[l], array[r]], "comparing");
-        unhighlightBars([array[i]], "selected");
-
-        if (largest !== i) {
-            highlightBars([array[i], array[largest]], "selected");
-            await sleep(150);
-            swapInDOM(array, i, largest, container);
-            await sleep(150);
-            unhighlightBars([array[i], array[largest]], "selected");
-            await heapify(n, largest);
-        }
-    }
-
-    
-    for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
-        await heapify(n, i);
-    }
-
-    
-    for (let i = n - 1; i > 0; i--) {
-        highlightBars([array[0], array[i]], "selected");
-        await sleep(150);
-        swapInDOM(array, 0, i, container);
-        unhighlightBars([array[0], array[i]], "selected");
-        array[i].classList.add("sorted");
-        await heapify(i, 0);
-    }
-
-    array[0].classList.add("sorted");
-}
 
 // dsa project
